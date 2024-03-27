@@ -43,4 +43,16 @@ describe('PromiseCache', () => {
       errorMessage
     )
   })
+
+  it('should respect custom ttl if provided', async () => {
+    mockDelegate.mockResolvedValue(42)
+    await cache.wrap('testKey', mockDelegate, 0.5) // Custom TTL of 0.5 seconds
+
+    // Wait for the custom TTL to expire
+    await new Promise((resolve) => setTimeout(resolve, 600))
+
+    // Call again with the same key, should call mockDelegate again due to expired custom TTL
+    await cache.wrap('testKey', mockDelegate, 0.5)
+    expect(mockDelegate).toHaveBeenCalledTimes(2)
+  })
 })
